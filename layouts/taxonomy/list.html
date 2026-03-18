@@ -1,25 +1,82 @@
 {{ define "main" }}
+<div class="taxonomy-hero">
+  <div class="container">
+    {{ if eq .Data.Plural "tags" }}
+    <div class="taxonomy-hero-icon">🏷️</div>
+    <h1 class="taxonomy-hero-title">标签云</h1>
+    <p class="taxonomy-hero-desc">共 <strong>{{ len .Data.Terms }}</strong> 个标签，记录每篇文章的技术关键词</p>
+    {{ else if eq .Data.Plural "categories" }}
+    <div class="taxonomy-hero-icon">📂</div>
+    <h1 class="taxonomy-hero-title">文章分类</h1>
+    <p class="taxonomy-hero-desc">共 <strong>{{ len .Data.Terms }}</strong> 个分类，按主题整理的技术文章集合</p>
+    {{ else }}
+    <div class="taxonomy-hero-icon">🗂️</div>
+    <h1 class="taxonomy-hero-title">{{ .Title }}</h1>
+    <p class="taxonomy-hero-desc">共 {{ len .Data.Terms }} 个条目</p>
+    {{ end }}
+  </div>
+</div>
+
 <div class="container">
   <div class="page-layout">
     <div class="post-list-main">
-      <header class="page-header">
-        {{ if eq .Data.Plural "tags" }}
-        <h1>🏷️ 标签</h1>
-        {{ else if eq .Data.Plural "categories" }}
-        <h1>📂 分类</h1>
-        {{ else }}
-        <h1>{{ .Title }}</h1>
-        {{ end }}
-      </header>
 
-      <div class="taxonomy-list">
-        {{ range .Data.Terms.Alphabetical }}
-        <a href="{{ .Page.Permalink }}" class="taxonomy-item">
-          <span class="taxonomy-name">{{ .Page.Title }}</span>
-          <span class="taxonomy-count">{{ .Count }}</span>
+      {{ if eq .Data.Plural "tags" }}
+      <!-- ===== Tags Cloud View ===== -->
+      <div class="taxo-cloud-wrap">
+        <div class="taxo-cloud">
+          {{ range .Data.Terms.ByCount }}
+          {{ $size := add 13 (mul .Count 3) }}
+          {{ if gt $size 26 }}{{ $size = 26 }}{{ end }}
+          <a href="{{ .Page.Permalink }}" class="taxo-cloud-tag" style="font-size: {{ $size }}px;">
+            <span class="taxo-cloud-hash">#</span>{{ .Page.Title }}
+            <span class="taxo-cloud-num">{{ .Count }}</span>
+          </a>
+          {{ end }}
+        </div>
+      </div>
+
+      <!-- Tag cards grid -->
+      <div class="taxo-grid-header">
+        <h2 class="taxo-grid-heading">全部标签</h2>
+        <span class="taxo-grid-sort">按文章数排列</span>
+      </div>
+      <div class="taxo-card-grid">
+        {{ range .Data.Terms.ByCount }}
+        <a href="{{ .Page.Permalink }}" class="taxo-card taxo-card--tag">
+          <span class="taxo-card-icon">#</span>
+          <span class="taxo-card-name">{{ .Page.Title }}</span>
+          <span class="taxo-card-badge">{{ .Count }} 篇</span>
         </a>
         {{ end }}
       </div>
+
+      {{ else if eq .Data.Plural "categories" }}
+      <!-- ===== Categories Grid View ===== -->
+      <div class="taxo-card-grid taxo-card-grid--cat">
+        {{ range .Data.Terms.ByCount }}
+        <a href="{{ .Page.Permalink }}" class="taxo-card taxo-card--cat">
+          <div class="taxo-card-cat-icon">📁</div>
+          <div class="taxo-card-cat-body">
+            <span class="taxo-card-name">{{ .Page.Title }}</span>
+            <span class="taxo-card-badge">{{ .Count }} 篇文章</span>
+          </div>
+          <svg class="taxo-card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        {{ end }}
+      </div>
+
+      {{ else }}
+      <div class="taxo-card-grid">
+        {{ range .Data.Terms.Alphabetical }}
+        <a href="{{ .Page.Permalink }}" class="taxo-card taxo-card--tag">
+          <span class="taxo-card-name">{{ .Page.Title }}</span>
+          <span class="taxo-card-badge">{{ .Count }}</span>
+        </a>
+        {{ end }}
+      </div>
+      {{ end }}
+
     </div>
 
     <aside class="sidebar">

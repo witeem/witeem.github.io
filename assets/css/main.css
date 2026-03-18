@@ -992,3 +992,280 @@ img { max-width: 100%; height: auto; }
   background: rgba(0,132,255,0.08);
   border-color: var(--color-primary);
 }
+
+/* ===== Taxonomy Hero ===== */
+.taxonomy-hero {
+  background: linear-gradient(135deg, rgba(0,132,255,0.08) 0%, rgba(0,170,255,0.05) 100%);
+  border-bottom: 1px solid var(--border-color);
+  padding: 3.5rem 1.5rem 2.5rem;
+  text-align: center;
+}
+
+.taxonomy-hero-icon {
+  font-size: 2.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.taxonomy-hero-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.6rem;
+  line-height: 1.2;
+}
+
+.taxo-term-hash {
+  color: var(--color-primary);
+  margin-right: 2px;
+}
+
+.taxonomy-hero-desc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.taxonomy-hero-desc strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.taxo-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid rgba(0,132,255,0.35);
+  border-radius: 99px;
+  transition: all var(--transition);
+}
+
+.taxo-back-link:hover {
+  background: rgba(0,132,255,0.08);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ===== Taxonomy Cloud (Tags) ===== */
+.taxo-cloud-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 2rem 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.taxo-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.taxo-cloud-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 0.25rem 0.6rem;
+  border-radius: 99px;
+  border: 1px solid transparent;
+  transition: all var(--transition);
+  line-height: 1.5;
+}
+
+.taxo-cloud-tag:hover {
+  color: var(--color-primary);
+  background: rgba(0,132,255,0.08);
+  border-color: rgba(0,132,255,0.3);
+}
+
+.taxo-cloud-hash {
+  color: var(--color-primary);
+  opacity: 0.7;
+  font-weight: 700;
+}
+
+.taxo-cloud-num {
+  font-size: 0.7em;
+  color: var(--text-muted);
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 99px;
+  padding: 0 0.4em;
+  margin-left: 0.25rem;
+  vertical-align: middle;
+  transition: all var(--transition);
+}
+
+.taxo-cloud-tag:hover .taxo-cloud-num {
+  background: rgba(0,132,255,0.12);
+  border-color: rgba(0,132,255,0.3);
+  color: var(--color-primary);
+}
+
+/* ===== Taxonomy Grid Header ===== */
+.taxo-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.taxo-grid-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.taxo-grid-sort {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ===== Taxonomy Card Grid ===== */
+.taxo-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.taxo-card-grid--cat {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+/* Tag card */
+.taxo-card--tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition);
+  overflow: hidden;
+}
+
+.taxo-card--tag:hover {
+  border-color: var(--color-primary);
+  background: rgba(0,132,255,0.04);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+  color: var(--text-primary);
+}
+
+.taxo-card-icon {
+  color: var(--color-primary);
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.taxo-card-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taxo-card-badge {
+  background: rgba(0,132,255,0.1);
+  color: var(--color-primary);
+  border-radius: 99px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Category card */
+.taxo-card--cat {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  transition: all var(--transition);
+}
+
+.taxo-card--cat:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  color: var(--text-primary);
+}
+
+.taxo-card--cat:hover .taxo-card-cat-icon {
+  transform: scale(1.15);
+}
+
+.taxo-card-cat-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.taxo-card-cat-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.taxo-card--cat .taxo-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taxo-card--cat .taxo-card-badge {
+  width: fit-content;
+  font-size: 0.78rem;
+}
+
+.taxo-card-arrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+
+.taxo-card--cat:hover .taxo-card-arrow {
+  color: var(--color-primary);
+  transform: translateX(3px);
+}
+
+/* ===== Term Post List ===== */
+.taxo-term-list .post-item:first-child {
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+}
+
+/* ===== Responsive Taxonomy ===== */
+@media (max-width: 768px) {
+  .taxonomy-hero { padding: 2.5rem 1rem 2rem; }
+  .taxonomy-hero-title { font-size: 1.75rem; }
+  .taxo-card-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .taxo-card-grid--cat { grid-template-columns: 1fr; }
+}

@@ -1,40 +1,53 @@
 {{ define "main" }}
+<div class="taxonomy-hero">
+  <div class="container">
+    {{ if eq .Data.Plural "tags" }}
+    <div class="taxonomy-hero-icon">🏷️</div>
+    <h1 class="taxonomy-hero-title"><span class="taxo-term-hash">#</span>{{ .Title }}</h1>
+    <p class="taxonomy-hero-desc">该标签下共 <strong>{{ len .Pages }}</strong> 篇文章</p>
+    {{ else if eq .Data.Plural "categories" }}
+    <div class="taxonomy-hero-icon">📂</div>
+    <h1 class="taxonomy-hero-title">{{ .Title }}</h1>
+    <p class="taxonomy-hero-desc">该分类下共 <strong>{{ len .Pages }}</strong> 篇文章</p>
+    {{ else }}
+    <div class="taxonomy-hero-icon">🗂️</div>
+    <h1 class="taxonomy-hero-title">{{ .Title }}</h1>
+    <p class="taxonomy-hero-desc">共 {{ len .Pages }} 篇文章</p>
+    {{ end }}
+    <a href="{{ if eq .Data.Plural "tags" }}{{ "/tags/" | absURL }}{{ else }}{{ "/categories/" | absURL }}{{ end }}" class="taxo-back-link">
+      ← 查看全部{{ if eq .Data.Plural "tags" }}标签{{ else }}分类{{ end }}
+    </a>
+  </div>
+</div>
+
 <div class="container">
   <div class="page-layout">
     <div class="post-list-main">
-      <header class="page-header">
-        {{ if eq .Data.Plural "tags" }}
-        <h1>🏷️ 标签：{{ .Title }}</h1>
-        {{ else if eq .Data.Plural "categories" }}
-        <h1>📂 分类：{{ .Title }}</h1>
-        {{ else }}
-        <h1>{{ .Title }}</h1>
-        {{ end }}
-        <p>共 {{ len .Pages }} 篇文章</p>
-      </header>
 
-      {{ range .Pages.ByDate.Reverse }}
-      <article class="post-item">
-        <div class="post-item-meta">
-          <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
-          {{ range .Params.categories }}
-          <span class="category-badge">{{ . }}</span>
-          {{ end }}
-        </div>
-        <h2 class="post-item-title">
-          <a href="{{ .Permalink }}">{{ .Title }}</a>
-        </h2>
-        <p class="post-item-desc">{{ .Description | default (.Summary | plainify | truncate 150) }}</p>
-        <div class="post-item-footer">
-          <div class="post-item-tags">
-            {{ range .Params.tags }}
-            <a href="{{ "/tags/" | relURL }}{{ . | urlize }}" class="tag-sm">#{{ . }}</a>
+      <div class="taxo-term-list">
+        {{ range .Pages.ByDate.Reverse }}
+        <article class="post-item taxo-post-item">
+          <div class="post-item-meta">
+            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006年01月02日" }}</time>
+            {{ range .Params.categories }}
+            <a href="{{ "/categories/" | relURL }}{{ . | urlize }}" class="category-badge">{{ . }}</a>
             {{ end }}
           </div>
-          <a href="{{ .Permalink }}" class="read-more">阅读全文 →</a>
-        </div>
-      </article>
-      {{ end }}
+          <h2 class="post-item-title">
+            <a href="{{ .Permalink }}">{{ .Title }}</a>
+          </h2>
+          <p class="post-item-desc">{{ .Description | default (.Summary | plainify | truncate 150) }}</p>
+          <div class="post-item-footer">
+            <div class="post-item-tags">
+              {{ range .Params.tags }}
+              <a href="{{ "/tags/" | relURL }}{{ . | urlize }}" class="tag-sm">#{{ . }}</a>
+              {{ end }}
+            </div>
+            <a href="{{ .Permalink }}" class="read-more">阅读全文 →</a>
+          </div>
+        </article>
+        {{ end }}
+      </div>
 
       {{ template "_internal/pagination.html" . }}
     </div>
