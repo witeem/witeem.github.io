@@ -1,0 +1,30 @@
+{{ define "main" }}
+<div class="container">
+  <div class="page-layout">
+    <div class="post-list-main">
+      <header class="page-header">
+        {{ if eq .Data.Plural "tags" }}
+        <h1>🏷️ 标签</h1>
+        {{ else if eq .Data.Plural "categories" }}
+        <h1>📂 分类</h1>
+        {{ else }}
+        <h1>{{ .Title }}</h1>
+        {{ end }}
+      </header>
+
+      <div class="taxonomy-list">
+        {{ range .Data.Terms.Alphabetical }}
+        <a href="{{ .Page.Permalink }}" class="taxonomy-item">
+          <span class="taxonomy-name">{{ .Page.Title }}</span>
+          <span class="taxonomy-count">{{ .Count }}</span>
+        </a>
+        {{ end }}
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      {{ partial "sidebar.html" . }}
+    </aside>
+  </div>
+</div>
+{{ end }}

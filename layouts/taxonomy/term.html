@@ -1,0 +1,47 @@
+{{ define "main" }}
+<div class="container">
+  <div class="page-layout">
+    <div class="post-list-main">
+      <header class="page-header">
+        {{ if eq .Data.Plural "tags" }}
+        <h1>🏷️ 标签：{{ .Title }}</h1>
+        {{ else if eq .Data.Plural "categories" }}
+        <h1>📂 分类：{{ .Title }}</h1>
+        {{ else }}
+        <h1>{{ .Title }}</h1>
+        {{ end }}
+        <p>共 {{ len .Pages }} 篇文章</p>
+      </header>
+
+      {{ range .Pages.ByDate.Reverse }}
+      <article class="post-item">
+        <div class="post-item-meta">
+          <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+          {{ range .Params.categories }}
+          <span class="category-badge">{{ . }}</span>
+          {{ end }}
+        </div>
+        <h2 class="post-item-title">
+          <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </h2>
+        <p class="post-item-desc">{{ .Description | default (.Summary | plainify | truncate 150) }}</p>
+        <div class="post-item-footer">
+          <div class="post-item-tags">
+            {{ range .Params.tags }}
+            <a href="{{ "/tags/" | relURL }}{{ . | urlize }}" class="tag-sm">#{{ . }}</a>
+            {{ end }}
+          </div>
+          <a href="{{ .Permalink }}" class="read-more">阅读全文 →</a>
+        </div>
+      </article>
+      {{ end }}
+
+      {{ template "_internal/pagination.html" . }}
+    </div>
+
+    <aside class="sidebar">
+      {{ partial "sidebar.html" . }}
+    </aside>
+  </div>
+</div>
+{{ end }}

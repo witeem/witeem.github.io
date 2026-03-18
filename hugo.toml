@@ -66,6 +66,7 @@ hasCJKLanguage = true
   page = ["HTML"]
   section = ["HTML", "RSS"]
   taxonomy = ["HTML"]
+  term = ["HTML"]
 
 [params.comments]
   enabled = false

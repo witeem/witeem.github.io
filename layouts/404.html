@@ -1,0 +1,39 @@
+{{ define "main" }}
+<div class="not-found-page">
+  <div class="not-found-inner">
+    <div class="not-found-code">404</div>
+    <div class="not-found-illus">
+      <svg width="160" height="120" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="80" cy="108" rx="60" ry="8" fill="#0084FF" fill-opacity="0.08"/>
+        <rect x="30" y="20" width="100" height="72" rx="8" fill="#E8F4FF" stroke="#0084FF" stroke-width="2"/>
+        <rect x="38" y="30" width="84" height="10" rx="3" fill="#B3D9FF"/>
+        <rect x="38" y="46" width="56" height="8" rx="3" fill="#CCE8FF"/>
+        <rect x="38" y="60" width="40" height="8" rx="3" fill="#CCE8FF"/>
+        <circle cx="118" cy="28" r="14" fill="#0084FF"/>
+        <text x="118" y="33" text-anchor="middle" font-size="16" fill="white" font-weight="bold">?</text>
+      </svg>
+    </div>
+    <h1 class="not-found-title">页面不存在</h1>
+    <p class="not-found-desc">
+      抱歉，你访问的页面已被删除、移动或从未存在过。<br/>
+      请检查链接是否正确，或返回首页继续浏览。
+    </p>
+    <div class="not-found-actions">
+      <a href="{{ "/" | relURL }}" class="btn btn-primary">
+        🏠 返回首页
+      </a>
+      <a href="{{ "/posts/" | relURL }}" class="btn btn-secondary">
+        📝 浏览文章
+      </a>
+    </div>
+    <div class="not-found-links">
+      <p>你也可以尝试以下页面：</p>
+      <ul>
+        <li><a href="{{ "/posts/" | relURL }}">文章列表</a></li>
+        <li><a href="{{ "/tags/" | relURL }}">标签云</a></li>
+        <li><a href="{{ "/about/" | relURL }}">关于我</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+{{ end }}
