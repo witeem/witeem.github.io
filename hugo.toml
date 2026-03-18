@@ -1,0 +1,71 @@
+baseURL = "https://witeem.github.io/"
+languageCode = "zh-CN"
+title = "Witeem's Blog | 魏天华的技术博客"
+paginate = 10
+enableRobotsTXT = true
+enableGitInfo = true
+hasCJKLanguage = true
+
+[params]
+  author = "TianHua Wei (魏天华)"
+  description = "A passionate backend developer from China. Sharing experiences on .NET Core, React, Microservices, Blazor, and more."
+  keywords = ["dotnet", "csharp", "react", "blazor", "microservices", "golang", "backend"]
+  avatar = "/images/avatar.png"
+  email = "witeem@126.com"
+  location = "Guangzhou, China"
+  github = "https://github.com/witeem"
+  slogan = "There is no smooth sailing in life, but it is every challenge that makes the future strong."
+
+[params.social]
+  github = "witeem"
+  email = "witeem@126.com"
+
+[menu]
+  [[menu.main]]
+    identifier = "home"
+    name = "首页"
+    url = "/"
+    weight = 1
+  [[menu.main]]
+    identifier = "posts"
+    name = "文章"
+    url = "/posts/"
+    weight = 2
+  [[menu.main]]
+    identifier = "tags"
+    name = "标签"
+    url = "/tags/"
+    weight = 3
+  [[menu.main]]
+    identifier = "categories"
+    name = "分类"
+    url = "/categories/"
+    weight = 4
+  [[menu.main]]
+    identifier = "about"
+    name = "关于"
+    url = "/about/"
+    weight = 5
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[markup]
+  [markup.highlight]
+    style = "monokai"
+    lineNos = true
+    lineNumbersInTable = true
+    codeFences = true
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[outputs]
+  home = ["HTML", "RSS"]
+  page = ["HTML"]
+  section = ["HTML", "RSS"]
+  taxonomy = ["HTML"]
+
+[params.comments]
+  enabled = false

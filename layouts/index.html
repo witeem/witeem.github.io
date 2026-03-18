@@ -1,0 +1,132 @@
+{{ define "main" }}
+<div class="home-hero">
+  <div class="hero-content">
+    <div class="hero-avatar">
+      <img src="{{ "/images/avatar.svg" | relURL }}" alt="{{ .Site.Params.author }}" />
+    </div>
+    <div class="hero-text">
+      <h1 class="hero-title">Hi 👋, I'm <span class="gradient-text">TianHua Wei</span></h1>
+      <p class="hero-subtitle">A passionate backend developer from China 🇨🇳</p>
+      <p class="hero-slogan">{{ .Site.Params.slogan }}</p>
+      <div class="hero-tags">
+        <span class="tag">.NET Core</span>
+        <span class="tag">C#</span>
+        <span class="tag">React</span>
+        <span class="tag">Blazor</span>
+        <span class="tag">Microservices</span>
+        <span class="tag">Golang</span>
+        <span class="tag">Docker</span>
+      </div>
+      <div class="hero-links">
+        <a href="https://github.com/witeem" class="btn btn-primary" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="{{ "/about/" | relURL }}" class="btn btn-secondary">关于我</a>
+        <a href="mailto:{{ .Site.Params.email }}" class="btn btn-outline">
+          📫 联系我
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="home-section">
+  <div class="section-header">
+    <h2>🔥 最新文章</h2>
+    <a href="{{ "/posts/" | relURL }}" class="view-all">查看全部 →</a>
+  </div>
+
+  <div class="post-grid">
+    {{ range first 6 (where .Site.RegularPages "Section" "posts") }}
+    <article class="post-card">
+      <div class="post-card-meta">
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006年01月02日" }}</time>
+        {{ range first 2 .Params.tags }}
+          <a href="{{ "/tags/" | relURL }}{{ . | urlize }}" class="post-tag">{{ . }}</a>
+        {{ end }}
+      </div>
+      <h3 class="post-card-title">
+        <a href="{{ .Permalink }}">{{ .Title }}</a>
+      </h3>
+      <p class="post-card-desc">{{ .Description | default (.Summary | truncate 120) }}</p>
+      <a href="{{ .Permalink }}" class="post-card-more">阅读全文 →</a>
+    </article>
+    {{ end }}
+  </div>
+</section>
+
+<section class="home-section skills-section">
+  <div class="section-header">
+    <h2>🛠️ 技术栈</h2>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-group">
+      <h4>后端</h4>
+      <div class="skill-tags">
+        <span>.NET Core</span><span>C#</span><span>ASP.NET</span>
+        <span>Golang</span><span>Redis</span><span>Elasticsearch</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <h4>前端</h4>
+      <div class="skill-tags">
+        <span>React</span><span>TypeScript</span><span>Blazor</span>
+        <span>React Native</span><span>MAUI</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <h4>架构 & 工具</h4>
+      <div class="skill-tags">
+        <span>Docker</span><span>Microservices</span><span>SignalR</span>
+        <span>SqlSugar</span><span>JWT</span><span>AutoMap</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="home-section projects-section">
+  <div class="section-header">
+    <h2>📁 开源项目</h2>
+    <a href="https://github.com/witeem" class="view-all" target="_blank" rel="noopener">GitHub →</a>
+  </div>
+  <div class="project-grid">
+    <a class="project-card" href="https://github.com/witeem/Blazor-Blog-Web" target="_blank" rel="noopener">
+      <div class="project-lang" style="background:#178600">C#</div>
+      <h4>Blazor-Blog-Web</h4>
+      <p>基于 Blazor Server 开发的个人博客前端，使用 MASA Blazor UI 组件库</p>
+      <span class="project-stars">⭐ 9</span>
+    </a>
+    <a class="project-card" href="https://github.com/witeem/BlogCore.API" target="_blank" rel="noopener">
+      <div class="project-lang" style="background:#178600">C#</div>
+      <h4>BlogCore.API</h4>
+      <p>.NET 6 后端通用基础架构，含 SqlSugar、AutoMap、JWT、Redis</p>
+      <span class="project-stars">⭐ 4</span>
+    </a>
+    <a class="project-card" href="https://github.com/witeem/Microservice-Core-Template" target="_blank" rel="noopener">
+      <div class="project-lang" style="background:#178600">C#</div>
+      <h4>Microservice-Core-Template</h4>
+      <p>.NET 6 轻量级微服务架构模板，集成服务注册发现、API 网关</p>
+      <span class="project-stars">⭐ 1</span>
+    </a>
+    <a class="project-card" href="https://github.com/witeem/ssq-predictor" target="_blank" rel="noopener">
+      <div class="project-lang" style="background:#dea584">Rust</div>
+      <h4>ssq-predictor</h4>
+      <p>React + TypeScript + Tauri 实现的双色球号码预测桌面应用</p>
+      <span class="project-stars">⭐ 1</span>
+    </a>
+    <a class="project-card" href="https://github.com/witeem/rn-app" target="_blank" rel="noopener">
+      <div class="project-lang" style="background:#2b7489">TypeScript</div>
+      <h4>rn-app</h4>
+      <p>React Native 跨平台应用，支持 iOS、Android 和 Web 平台</p>
+      <span class="project-stars">⭐ 1</span>
+    </a>
+    <a class="project-card" href="https://github.com/witeem/SignalR-Simple-Demo" target="_blank" rel="noopener">
+      <div class="project-lang" style="background:#e34c26">HTML</div>
+      <h4>SignalR-Simple-Demo</h4>
+      <p>基于 .NET 6 + MVC + JS 的 SignalR 实时通信简单案例</p>
+      <span class="project-stars">⭐ 1</span>
+    </a>
+  </div>
+</section>
+{{ end }}

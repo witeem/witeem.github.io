@@ -1,0 +1,63 @@
+{{ define "main" }}
+<div class="container">
+  <div class="page-layout">
+    <article class="single-post">
+      <header class="post-header">
+        <div class="post-header-meta">
+          <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006年01月02日" }}</time>
+          <span class="reading-time">📖 约 {{ .WordCount }} 字 · {{ .ReadingTime }} 分钟阅读</span>
+        </div>
+        <h1 class="post-title">{{ .Title }}</h1>
+        {{ if .Description }}
+        <p class="post-description">{{ .Description }}</p>
+        {{ end }}
+        <div class="post-tags">
+          {{ range .Params.tags }}
+          <a href="{{ "/tags/" | relURL }}{{ . | urlize }}" class="tag">#{{ . }}</a>
+          {{ end }}
+        </div>
+      </header>
+
+      <!-- Table of Contents -->
+      {{ if .TableOfContents }}
+      <div class="toc">
+        <div class="toc-title">📋 目录</div>
+        {{ .TableOfContents }}
+      </div>
+      {{ end }}
+
+      <div class="post-content">
+        {{ .Content }}
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          {{ with .PrevInSection }}
+          <a href="{{ .Permalink }}" class="post-nav-link prev">
+            <span class="post-nav-label">← 上一篇</span>
+            <span class="post-nav-title">{{ .Title }}</span>
+          </a>
+          {{ end }}
+          {{ with .NextInSection }}
+          <a href="{{ .Permalink }}" class="post-nav-link next">
+            <span class="post-nav-label">下一篇 →</span>
+            <span class="post-nav-title">{{ .Title }}</span>
+          </a>
+          {{ end }}
+        </div>
+
+        <div class="post-share">
+          <p>如果本文对你有帮助，欢迎分享 😊</p>
+          <a href="https://github.com/witeem" target="_blank" rel="noopener" class="btn btn-outline">
+            🐙 Follow on GitHub
+          </a>
+        </div>
+      </footer>
+    </article>
+
+    <aside class="sidebar">
+      {{ partial "sidebar.html" . }}
+    </aside>
+  </div>
+</div>
+{{ end }}

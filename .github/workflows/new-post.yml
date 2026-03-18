@@ -1,0 +1,98 @@
+name: 📝 New Post
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: '文章标题（英文，用于文件名）'
+        required: true
+        type: string
+      title_cn:
+        description: '文章中文标题'
+        required: true
+        type: string
+      category:
+        description: '文章分类'
+        required: true
+        default: '后端开发'
+        type: choice
+        options:
+          - 后端开发
+          - 前端开发
+          - 架构设计
+          - 微服务
+          - 跨平台开发
+          - Blazor
+          - React
+          - DevOps
+          - 读书笔记
+          - 随笔
+      tags:
+        description: '标签（逗号分隔，如：dotnet,csharp,backend）'
+        required: true
+        type: string
+      description:
+        description: '文章简介'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create-post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📝 Create post file
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          SLUG="${{ github.event.inputs.title }}"
+          SLUG=$(echo "$SLUG" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed 's/[^a-z0-9-]//g')
+          FILE_PATH="content/posts/${SLUG}.md"
+          
+          # 处理标签 - 转换为 YAML 列表
+          TAGS_INPUT="${{ github.event.inputs.tags }}"
+          TAGS_YAML=""
+          IFS=',' read -ra TAG_ARRAY <<< "$TAGS_INPUT"
+          for tag in "${TAG_ARRAY[@]}"; do
+            tag=$(echo "$tag" | xargs)  # trim whitespace
+            TAGS_YAML="${TAGS_YAML}  - \"${tag}\"\n"
+          done
+          
+          cat > "$FILE_PATH" << EOF
+          ---
+          title: "${{ github.event.inputs.title_cn }}"
+          date: ${DATE}
+          draft: false
+          tags:
+          $(printf "$TAGS_YAML")
+          categories:
+            - "${{ github.event.inputs.category }}"
+          description: "${{ github.event.inputs.description }}"
+          ---
+
+          ## 前言
+
+          > 在此处填写文章内容...
+
+          ## 正文
+
+          ## 总结
+          EOF
+          
+          echo "✅ Created: $FILE_PATH"
+          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+
+      - name: 💾 Commit and push
+        run: |
+          git config --local user.email "witeem@126.com"
+          git config --local user.name "witeem"
+          git add "${{ env.FILE_PATH }}"
+          git commit -m "📝 新文章: ${{ github.event.inputs.title_cn }}"
+          git push

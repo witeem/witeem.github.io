@@ -1,0 +1,25 @@
+{{ define "main" }}
+<div class="container">
+  <div class="about-layout">
+    <div class="about-content">
+      {{ .Content }}
+    </div>
+    <aside class="about-sidebar">
+      <div class="profile-card">
+        <img src="{{ "/images/avatar.svg" | relURL }}" alt="{{ .Site.Params.author }}" class="profile-avatar" />
+        <h3>{{ .Site.Params.author }}</h3>
+        <p class="profile-bio">A passionate backend developer from China</p>
+        <p class="profile-location">📍 Guangzhou, China</p>
+        <div class="profile-links">
+          <a href="https://github.com/witeem" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+            🐙 GitHub
+          </a>
+          <a href="mailto:{{ .Site.Params.email }}" class="btn btn-outline btn-sm">
+            📫 Email
+          </a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+{{ end }}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{{ if .IsHome }}{{ .Site.Params.description }}{{ else }}{{ .Description | default .Summary | plainify | truncate 160 }}{{ end }}" />
+  <meta name="keywords" content="{{ range .Site.Params.keywords }}{{ . }},{{ end }}" />
+  <meta name="author" content="{{ .Site.Params.author }}" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="{{ .Title }} | {{ .Site.Title }}" />
+  <meta property="og:description" content="{{ .Description | default .Site.Params.description }}" />
+  <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}" />
+  <meta property="og:url" content="{{ .Permalink }}" />
+
+  <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
+
+  <!-- RSS -->
+  {{ range .AlternativeOutputFormats -}}
+    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+  {{ end -}}
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="{{ "/css/main.css" | relURL }}" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{{ "/favicon.svg" | relURL }}" />
+</head>
+<body>
+  {{ partial "header.html" . }}
+  <main class="site-main">
+    {{ block "main" . }}{{ end }}
+  </main>
+  {{ partial "footer.html" . }}
+
+  <!-- Highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('pre code').forEach(block => {
+        hljs.highlightElement(block);
+      });
+    });
+  </script>
+
+  <!-- Theme Toggle -->
+  <script src="{{ "/js/theme.js" | relURL }}"></script>
+</body>
+</html>
