@@ -1269,3 +1269,442 @@ img { max-width: 100%; height: auto; }
   .taxo-card-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   .taxo-card-grid--cat { grid-template-columns: 1fr; }
 }
+
+
+/* ============================================================
+   🎱 双色球 SSQ 专属样式
+   ============================================================ */
+
+/* ── 页面 Hero ── */
+.ssq-page { padding-top: 2rem; padding-bottom: 3rem; }
+
+.ssq-hero {
+  text-align: center;
+  padding: 2.5rem 1rem 2rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: var(--border-radius);
+  margin-bottom: 2rem;
+  color: #fff;
+}
+.ssq-hero-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+.ssq-hero-desc  { color: rgba(255,255,255,0.75); font-size: 0.95rem; }
+
+/* ── 更新时间 ── */
+.ssq-update-time {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Tab 切换 ── */
+.ssq-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0;
+}
+
+.ssq-tab {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+}
+.ssq-tab:hover  { color: var(--color-primary); background: rgba(0,132,255,0.06); }
+.ssq-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 600; }
+
+/* ── Tab 内容 ── */
+.ssq-tab-content { display: none; }
+.ssq-tab-content.active { display: block; }
+
+/* ── 开奖历史表格 ── */
+.ssq-history-table { overflow-x: auto; margin: 1rem 0; }
+.ssq-history-table table { width: 100%; border-collapse: collapse; }
+.ssq-history-table th,
+.ssq-history-table td {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-color);
+  text-align: center;
+  font-size: 0.9rem;
+}
+.ssq-history-table th { background: var(--bg-sidebar); font-weight: 600; }
+.ssq-history-table tr:hover { background: rgba(0,132,255,0.04); }
+
+/* ── 球样式 ── */
+.ball-red, .ball-blue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 1px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  vertical-align: middle;
+  line-height: 1;
+}
+.ball-red {
+  background: radial-gradient(circle at 35% 35%, #ff6b6b, #cc0000);
+  border: 1.5px solid #aa0000;
+}
+.ball-blue {
+  background: radial-gradient(circle at 35% 35%, #4da6ff, #0055cc);
+  border: 1.5px solid #003fa3;
+}
+
+/* ── 频次统计网格 ── */
+.ssq-freq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.freq-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  transition: all var(--transition);
+}
+.freq-item:hover { border-color: var(--color-primary); }
+.freq-item.top1  { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+.freq-item.top3  { border-color: #ef4444; background: rgba(239,68,68,0.06); }
+.freq-item.top10 { border-color: #f87171; background: rgba(248,113,113,0.04); }
+.freq-item.blue.top1 { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+.freq-item.blue.top3 { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
+
+.freq-num {
+  font-size: 0.82rem;
+  font-weight: 700;
+  width: 22px;
+  text-align: center;
+  color: var(--text-primary);
+}
+.freq-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.freq-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+.freq-bar.blue-bar {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+.freq-count {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  width: 24px;
+  text-align: right;
+}
+
+/* ── 冷热号展示 ── */
+.ssq-hot-cold {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 1.5rem 0;
+  padding: 1rem 1.2rem;
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+.hot-cold-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.hot-cold-item .ball-red,
+.hot-cold-item .ball-blue {
+  margin: 0 2px;
+}
+.hc-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 130px;
+}
+
+/* ── 预测结果 ── */
+.ssq-score-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1.2rem;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  font-size: 0.82rem;
+}
+.score-legend-title {
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-right: 0.25rem;
+}
+.score-dim {
+  padding: 0.2rem 0.55rem;
+  border-radius: 99px;
+  background: rgba(0,132,255,0.08);
+  color: var(--color-primary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ssq-predict-note {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(0,132,255,0.06);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+
+.ssq-algo-block {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+.ssq-algo-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.3rem;
+}
+.ssq-algo-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.ssq-pred-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.ssq-pred-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-body);
+  transition: all var(--transition);
+}
+.ssq-pred-item:hover { border-color: var(--color-primary); box-shadow: var(--shadow-sm); }
+.ssq-pred-item.hit-prize { border-color: #f59e0b; background: rgba(245,158,11,0.06); }
+.ssq-pred-item.no-prize  { opacity: 0.8; }
+
+.pred-rank  { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); min-width: 40px; }
+.pred-balls { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; flex: 1; }
+.pred-score { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+.pred-result {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.ssq-disclaimer {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 1.5rem;
+  padding: 0.6rem;
+  background: rgba(245,158,11,0.06);
+  border-radius: var(--border-radius-sm);
+  border: 1px dashed #f59e0b55;
+}
+
+/* ── 准确率验证 ── */
+.ssq-accuracy-header {
+  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-sm);
+  border-left: 4px solid var(--color-primary);
+  margin-bottom: 1.5rem;
+}
+.ssq-accuracy-header p { margin: 0.2rem 0; font-size: 0.9rem; }
+
+.ssq-no-data {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* ── 响应式 ── */
+@media (max-width: 768px) {
+  .ssq-hero-title  { font-size: 1.5rem; }
+  .ssq-tabs        { gap: 0.25rem; }
+  .ssq-tab         { padding: 0.5rem 0.75rem; font-size: 0.82rem; }
+  .ssq-freq-grid   { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .ball-red, .ball-blue { width: 26px; height: 26px; font-size: 0.7rem; }
+  .ssq-pred-item   { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── 频次统计美化卡片 ── */
+.ssq-freq-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin: 1rem 0 2rem;
+}
+.ssq-freq-cards--blue {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.freq-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  transition: all var(--transition);
+}
+.freq-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 排名徽章样式 */
+.freq-card.rank-gold   { border-color: #f59e0b; background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04)); }
+.freq-card.rank-silver { border-color: #94a3b8; background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(148,163,184,0.04)); }
+.freq-card.rank-bronze { border-color: #cd7f32; background: linear-gradient(135deg, rgba(205,127,50,0.12), rgba(205,127,50,0.04)); }
+.freq-card.rank-hot    { border-color: rgba(239,68,68,0.4); }
+.freq-card.rank-cold   { border-color: rgba(96,165,250,0.4); opacity: 0.85; }
+
+.freq-card--blue.rank-gold   { border-color: #f59e0b; background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04)); }
+.freq-card--blue.rank-silver { border-color: #94a3b8; background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(148,163,184,0.04)); }
+.freq-card--blue.rank-bronze { border-color: #cd7f32; background: linear-gradient(135deg, rgba(205,127,50,0.12), rgba(205,127,50,0.04)); }
+.freq-card--blue.rank-hot    { border-color: rgba(59,130,246,0.4); }
+.freq-card--blue.rank-cold   { border-color: rgba(148,163,184,0.3); opacity: 0.85; }
+
+.fc-rank {
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* 进度条 */
+.fc-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 40px;
+}
+.fc-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #dc2626, #f87171);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  min-width: 2px;
+}
+.fc-bar--blue {
+  background: linear-gradient(90deg, #1d4ed8, #60a5fa);
+}
+.rank-gold   .fc-bar { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.rank-silver .fc-bar { background: linear-gradient(90deg, #64748b, #94a3b8); }
+.rank-bronze .fc-bar { background: linear-gradient(90deg, #92400e, #d97706); }
+
+/* 统计数字区 */
+.fc-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  min-width: 52px;
+  flex-shrink: 0;
+}
+.fc-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.fc-diff {
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.freq-above { color: #16a34a; }
+.freq-below { color: #dc2626; }
+
+/* ── 历史列表页 ── */
+.ssq-history-list { padding: 1rem 0; }
+
+.ssq-entry-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.ssq-entry-list li a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all var(--transition);
+}
+.ssq-entry-list li a:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+/* ── 响应式补充 ── */
+@media (max-width: 768px) {
+  .ssq-freq-cards { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+  .fc-bar-wrap    { min-width: 28px; }
+  .ssq-entry-list { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .ssq-freq-cards { grid-template-columns: repeat(2, 1fr); }
+  .ssq-entry-list { grid-template-columns: 1fr; }
+}
+
