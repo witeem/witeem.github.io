@@ -379,6 +379,29 @@ def fmt_ball(num, is_blue=False):
     return f'<span class="{cls}">{num:02d}</span>'
 
 
+def _donate_block() -> list:
+    """
+    打赏模块 HTML 片段（复用于预测和验证两个 tab）。
+    二维码图片放在 /images/donate-wechat.jpg 和 /images/donate-alipay.jpg。
+    """
+    return [
+        '<div class="ssq-donate">',
+        '  <div class="donate-title">☕ 觉得有用？请作者喝杯咖啡</div>',
+        '  <p class="donate-desc">内容完全免费，如果对你有帮助，欢迎打赏支持持续更新 🙏</p>',
+        '  <div class="donate-qrcodes">',
+        '    <div class="donate-item">',
+        '      <img src="/images/donate-wechat.jpg" alt="微信赞赏码" class="donate-qr" />',
+        '      <span class="donate-label">💚 微信</span>',
+        '    </div>',
+        '    <div class="donate-item">',
+        '      <img src="/images/donate-alipay.jpg" alt="支付宝收款码" class="donate-qr" />',
+        '      <span class="donate-label">💙 支付宝</span>',
+        '    </div>',
+        '  </div>',
+        '</div>',
+    ]
+
+
 def fmt_combo(reds, blue):
     """格式化一组号码"""
     balls = " ".join(fmt_ball(r) for r in sorted(reds))
@@ -629,6 +652,10 @@ def generate_markdown(records, red_counter, blue_counter, all_predictions, last_
     lines += [
         '<p class="ssq-disclaimer">⚠️ 以上预测仅供娱乐参考，彩票具有随机性，请理性购彩。</p>',
         "",
+    ]
+    lines += _donate_block()
+    lines += [
+        "",
         "</div>",
         "",
     ]
@@ -707,7 +734,9 @@ def generate_markdown(records, red_counter, blue_counter, all_predictions, last_
                 "",
             ]
 
+    lines += _donate_block()
     lines += [
+        "",
         "</div>",
         "",
     ]
@@ -780,6 +809,40 @@ def update_index_page(ssq_dir):
     with open(index_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     print(f"[INFO] 历史列表页已更新: {index_path}")
+
+
+# ──────────────────────────────────────────────
+# 7. 清理旧 MD 文件（仅保留最近 N 期）
+# ──────────────────────────────────────────────
+KEEP_MD_COUNT = 20   # 保留最近期数
+
+
+def cleanup_old_md(ssq_dir: str, keep: int = KEEP_MD_COUNT):
+    """
+    扫描 ssq/ 目录下所有 YYYY-MM-DD.md 文件，
+    按日期降序排列后，删除超出 keep 数量的旧文件。
+    """
+    dated_files = []
+    for fname in os.listdir(ssq_dir):
+        if re.match(r'^\d{4}-\d{2}-\d{2}\.md$', fname):
+            dated_files.append(fname)
+
+    dated_files.sort(reverse=True)   # 最新在前
+
+    to_delete = dated_files[keep:]   # 超出保留数量的文件
+    if not to_delete:
+        print(f"[INFO] MD 文件共 {len(dated_files)} 个，无需清理（保留上限 {keep}）。")
+        return
+
+    for fname in to_delete:
+        fpath = os.path.join(ssq_dir, fname)
+        try:
+            os.remove(fpath)
+            print(f"[CLEAN] 已删除旧文件: {fname}")
+        except OSError as e:
+            print(f"[WARN] 删除失败 {fname}: {e}")
+
+    print(f"[INFO] 清理完成，删除 {len(to_delete)} 个旧文件，保留最新 {keep} 个。")
 
 
 # ──────────────────────────────────────────────
@@ -879,6 +942,9 @@ def main():
 
     # 6. 更新历史列表页
     update_index_page(SSQ_DIR)
+
+    # 6.5 清理旧 MD 文件，仅保留最近 KEEP_MD_COUNT 期
+    cleanup_old_md(SSQ_DIR)
 
     # 7. 保存本次预测供下次对比
     save_prediction(save_data, records[0]["period"])
