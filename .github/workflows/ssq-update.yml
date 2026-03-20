@@ -13,7 +13,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # 用于 git push 新生成的 MD 文件
+  contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: "ssq-update"
@@ -60,3 +62,34 @@ jobs:
             git push
           fi
           # push 到 main 后，deploy.yml 会自动触发 Hugo 构建和部署
+
+      - name: 🔧 Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+
+      - name: 📦 Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: 🏗️ Build with Hugo
+        env:
+          HUGO_ENVIRONMENT: production
+          TZ: Asia/Shanghai
+        run: |
+          hugo \
+            --gc \
+            --minify \
+            --baseURL "https://witeem.github.io/"
+
+      - name: ✅ Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+      - name: 🌐 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
