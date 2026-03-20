@@ -1,18 +1,19 @@
 name: 🎱 双色球数据更新
 
 on:
-  # 每天北京时间 09:00 自动运行（UTC 01:00）
+  # 双色球每周二、四、日开奖，次日北京时间 06:00 抓取并更新
+  # 北京时间 06:00 = UTC 22:00（前一天）
+  # 周三（3）= 周二开奖次日  → UTC 周二 22:00（cron 星期三）
+  # 周五（5）= 周四开奖次日  → UTC 周四 22:00（cron 星期五）
+  # 周一（1）= 周日开奖次日  → UTC 周日 22:00（cron 星期一）
   schedule:
-    - cron: "0 1 * * *"
+    - cron: "0 22 * * 0,2,4"
 
   # 允许手动触发
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
-  actions: write
+  contents: write   # 用于 git push 新生成的 MD 文件
 
 concurrency:
   group: "ssq-update"
@@ -58,34 +59,4 @@ jobs:
             git commit -m "🎱 chore: SSQ predictions ${DATE} [auto]"
             git push
           fi
-
-      - name: 🔧 Setup Hugo
-        uses: peaceiris/actions-hugo@v3
-        with:
-          hugo-version: ${{ env.HUGO_VERSION }}
-          extended: true
-
-      - name: 📦 Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      - name: 🏗️ Build with Hugo
-        env:
-          HUGO_ENVIRONMENT: production
-          TZ: Asia/Shanghai
-        run: |
-          hugo \
-            --gc \
-            --minify \
-            --baseURL "https://witeem.github.io/"
-
-      - name: ✅ Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./public
-
-      - name: 🌐 Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          # push 到 main 后，deploy.yml 会自动触发 Hugo 构建和部署
