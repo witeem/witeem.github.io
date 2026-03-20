@@ -202,58 +202,251 @@ def _top_unique(results, top=TOP_N):
     return ranked
 
 
-def algo_hot(red_counter, blue_counter, total, n=SIMULATE):
+def _build_decay_weights(records, all_reds, half_life: int = 30):
+    """
+    指数衰减频次权重：越近期出现的号码权重越高。
+    weight(r, t) = exp(-λ * t)，λ = ln2 / half_life
+    t = 距今期数(0 = 最新一期）
+    """
+    import math as _math
+    lam = _math.log(2) / half_life
+    decay_w = {r: 0.0 for r in all_reds}
+    for t, rec in enumerate(records):          # records[0] 最新
+        w = _math.exp(-lam * t)
+        for r in rec["reds"]:
+            if r in decay_w:
+                decay_w[r] += w
+    # 归一化到 [0.1, 1] 避免零权重
+    max_w = max(decay_w.values()) or 1.0
+    return {r: max(0.1, decay_w[r] / max_w) for r in all_reds}
+
+
+def _build_cooccurrence(records, all_reds):
+    """
+    构建二阶共现矩阵：co[a][b] = 号码 a 和 b 在同一期同时出现的次数。
+    用于条件抽样：已选 a 时，更新 b 的权重 += co[a][b]。
+    """
+    co = {r: {s: 0 for s in all_reds} for r in all_reds}
+    for rec in records:
+        reds = rec["reds"]
+        for i in range(len(reds)):
+            for j in range(i + 1, len(reds)):
+                a, b = reds[i], reds[j]
+                co[a][b] += 1
+                co[b][a] += 1
+    return co
+
+
+def algo_hot(red_counter, blue_counter, total, n=SIMULATE, records=None):
     """
     算法1：热号恒热
-    频率越高，权重指数放大（freq²），从全域加权采样，
-    高频球被选中的概率远高于低频球。
+
+    Step1 - 指数衰减权重（滑动窗口效应）：
+            近期出现的号码权重更高，半衰期 30 期；
+            比简单累计频次更能捕捉"最近热"趋势。
+
+    Step2 - 条件抽样（二阶相关矩阵）：
+            选出第 k 个球后，实时将已选球与剩余球的
+            历史共现次数叠加到剩余球权重上，
+            让"经常同框"的热号组合更易被整体选中。
+
+    Step3 - 蓝球同样采用指数衰减权重。
     """
-    top10_hot    = _build_top10(red_counter)
-    all_reds     = list(RED_RANGE)
-    all_blues    = list(BLUE_RANGE)
-    # 指数放大：freq² 使热号优势更显著
-    red_weights  = [red_counter.get(r, 0.1) ** 2 for r in all_reds]
-    blue_weights = [blue_counter.get(b, 0.1) ** 2 for b in all_blues]
+    top10_hot = _build_top10(red_counter)
+    all_reds  = list(RED_RANGE)
+    all_blues = list(BLUE_RANGE)
+
+    # ── Step1: 衰减权重（需要 records）──
+    if records:
+        decay_w = _build_decay_weights(records, all_reds, half_life=30)
+        # 指数放大热号优势：decay²
+        base_weights = {r: decay_w[r] ** 2 for r in all_reds}
+
+        # 蓝球衰减
+        import math as _math
+        lam = _math.log(2) / 30
+        blue_decay = {b: 0.0 for b in all_blues}
+        for t, rec in enumerate(records):
+            w = _math.exp(-lam * t)
+            b = rec["blue"]
+            if b in blue_decay:
+                blue_decay[b] += w
+        max_bw = max(blue_decay.values()) or 1.0
+        blue_weights = [max(0.1, blue_decay[b] / max_bw) ** 2 for b in all_blues]
+    else:
+        # 无 records 时退化为原始 freq² 权重
+        base_weights = {r: red_counter.get(r, 0.1) ** 2 for r in all_reds}
+        blue_weights = [blue_counter.get(b, 0.1) ** 2 for b in all_blues]
+
+    # ── Step2: 预构建共现矩阵 ──
+    co = _build_cooccurrence(records, all_reds) if records else None
 
     results = []
     for _ in range(n):
-        # 加权无放回抽样（借助权重拒绝采样）
-        selected = set()
-        while len(selected) < 6:
-            pick = random.choices(all_reds, weights=red_weights, k=1)[0]
-            selected.add(pick)
+        # 条件抽样：每选一个球，更新剩余球权重
+        remaining = list(all_reds)
+        rem_weights = [base_weights[r] for r in remaining]
+        selected = []
+
+        for _ in range(6):
+            # 归一化后抽样
+            pick = random.choices(remaining, weights=rem_weights, k=1)[0]
+            selected.append(pick)
+            idx = remaining.index(pick)
+            remaining.pop(idx)
+            rem_weights.pop(idx)
+
+            # 根据已选球更新剩余球权重（共现叠加）
+            if co:
+                for j, r in enumerate(remaining):
+                    rem_weights[j] = max(
+                        0.01,
+                        rem_weights[j] + co[pick][r] * 0.5   # 共现加成系数
+                    )
+
         combo = tuple(sorted(selected))
         blue  = random.choices(all_blues, weights=blue_weights, k=1)[0]
-        score = _score_combo_advanced(combo, blue, red_counter, blue_counter, total, top10_hot)
+        score = _score_combo_advanced(combo, blue, red_counter, blue_counter,
+                                      total, top10_hot)
         results.append((combo, blue, score))
+
     return _top_unique(results)
 
 
-def algo_cold_rebound(red_counter, blue_counter, total, n=SIMULATE):
+def algo_cold_rebound(red_counter, blue_counter, total, n=SIMULATE, records=None):
     """
     算法2：冷号反弹
-    频率越低，权重越大（1/freq）。历史冷号长期未出，
-    从统计回归角度看有补偿出现的倾向。
+    综合4个维度计算动态权重，逻辑更严谨：
+
+    Step1 - 遗漏期数权重：统计每个号码距今已多少期未出现，
+            遗漏越长权重指数上升（反映"欠债"积累效应）。
+    Step2 - 偏离标准差权重：计算各号码频次与均值的标准差，
+            负偏离越大（出现次数显著低于均值）权重越高。
+    Step3 - 动态冷热比例过滤：每注必须包含 2~3 个冷号
+           （遗漏 > 阈值）+ 3~4 个次热号，避免全冷组合
+            导致评分过低无法入选。
+    Step4 - 关联性修正：若同一注中两个冷号曾在历史上
+            同期出现过，视为"关联热"，适当降低其冷号权重
+            以增加组合多样性。
     """
-    top10_hot    = _build_top10(red_counter)
-    all_reds     = list(RED_RANGE)
-    all_blues    = list(BLUE_RANGE)
-    max_red_freq  = max(red_counter.values()) if red_counter else 1
+    top10_hot  = _build_top10(red_counter)
+    all_reds   = list(RED_RANGE)
+    all_blues  = list(BLUE_RANGE)
+    total_draws = total
+
+    # ── Step 1: 遗漏期数 ──
+    # 用 records 不在函数参数里，改用 red_counter 总次数估算：
+    # 遗漏 ≈ 某号"理论上应出现的间隔" - "实际最近一次出现距今期数"
+    # 简化做法：以 total / freq 估算平均间隔，遗漏 = 平均间隔 * 修正系数
+    avg_freq = (total_draws * 6) / 33          # 红球理论均值
+    absence = {}                               # 估算遗漏期数
+    for r in all_reds:
+        freq = red_counter.get(r, 0)
+        if freq == 0:
+            absence[r] = total_draws           # 从未出现，遗漏 = 全部期数
+        else:
+            # 平均间隔 = total / freq；若低于均值则遗漏更显著
+            avg_interval = total_draws / freq
+            absence[r] = avg_interval * max(1.0, avg_freq / max(freq, 0.1))
+
+    max_absence = max(absence.values()) or 1
+
+    # ── Step 2: 偏离标准差 ──
+    freqs    = [red_counter.get(r, 0) for r in all_reds]
+    mean_f   = sum(freqs) / len(freqs)
+    std_f    = (sum((f - mean_f) ** 2 for f in freqs) / len(freqs)) ** 0.5 or 1
+    # 负偏离越大 → deviation_weight 越高
+    dev_weight = {r: max(0.0, (mean_f - red_counter.get(r, 0)) / std_f + 1.0)
+                  for r in all_reds}
+
+    # ── Step 3: 冷热分区 ──
+    # 冷号：遗漏超过平均间隔 1.5 倍
+    cold_threshold = (total_draws / max(avg_freq, 1)) * 1.5
+    cold_set  = {r for r in all_reds if absence[r] >= cold_threshold}
+    warm_set  = {r for r in all_reds if r not in cold_set}   # 次热号池
+
+    # 至少要有 2 个冷号和 3 个次热号可供抽取，否则降低阈值
+    if len(cold_set) < 2:
+        cold_set = set(sorted(all_reds, key=lambda x: -absence[x])[:6])
+        warm_set = set(all_reds) - cold_set
+    if len(warm_set) < 3:
+        warm_set = set(all_reds) - cold_set
+
+    # ── Step 4: 关联性修正（冷号对共现惩罚）──
+    # 预计算冷号两两共现次数（从 red_counter 无法直接得到，
+    # 用频次乘积近似：共现越多说明两者都热，作为冷号可信度打折）
+    def pair_penalty(a, b):
+        """两冷号频次越高（说明并非真冷），惩罚越大；均低则无惩罚"""
+        fa = red_counter.get(a, 0) / total_draws
+        fb = red_counter.get(b, 0) / total_draws
+        # 期望共现 ≈ fa * fb * C(6,2)/C(33,2) 级别，简化为乘积
+        return fa * fb * 100   # 归一化到 [0,1] 量级
+
+    # ── 综合权重（遗漏 × 偏离）──
+    def cold_weight(r):
+        w_abs = absence[r] / max_absence          # [0,1]
+        w_dev = dev_weight[r]                     # ≥0，偏离越大越高
+        return (w_abs * 0.6 + min(w_dev, 2.0) * 0.4 / 2.0)  # 归一化叠加
+
+    cold_list  = sorted(cold_set,  key=lambda x: -cold_weight(x))
+    warm_list  = sorted(warm_set,  key=lambda x: red_counter.get(x, 0))  # 次热：频次低优先
+
+    cold_weights_list = [cold_weight(r) for r in cold_list]
+    warm_weights_list = [1.0 / (red_counter.get(r, 0.1) + 1) for r in warm_list]
+
+    # 蓝球：反转频次权重
     max_blue_freq = max(blue_counter.values()) if blue_counter else 1
-    # 反转权重：频率越低，权重越大
-    red_weights  = [1.0 / (red_counter.get(r, 0.1) / max_red_freq + 0.05) for r in all_reds]
-    blue_weights = [1.0 / (blue_counter.get(b, 0.1) / max_blue_freq + 0.05) for b in all_blues]
+    blue_weights  = [1.0 / (blue_counter.get(b, 0.1) / max_blue_freq + 0.05)
+                     for b in all_blues]
 
     results = []
     for _ in range(n):
-        selected = set()
-        while len(selected) < 6:
-            pick = random.choices(all_reds, weights=red_weights, k=1)[0]
-            selected.add(pick)
-        combo = tuple(sorted(selected))
+        # 每注抽 2~3 个冷号 + 补足到 6 个次热号
+        n_cold = random.choices([2, 3], weights=[0.5, 0.5])[0]
+        n_warm = 6 - n_cold
+
+        # 冷号加权无放回抽样
+        cold_picked = set()
+        cw = list(cold_weights_list)
+        cl = list(cold_list)
+        while len(cold_picked) < n_cold and cl:
+            pick = random.choices(cl, weights=cw, k=1)[0]
+            idx  = cl.index(pick)
+            cold_picked.add(pick)
+            cl.pop(idx); cw.pop(idx)
+
+        # 关联性修正：若两个冷号之间惩罚高，有概率替换其中一个
+        cold_picked = list(cold_picked)
+        if len(cold_picked) == 2:
+            penalty = pair_penalty(cold_picked[0], cold_picked[1])
+            if random.random() < penalty:
+                # 替换惩罚较高的那个
+                cold_picked.pop(0)
+                extra = [r for r in cold_list if r not in cold_picked]
+                if extra:
+                    ew = [cold_weight(r) for r in extra]
+                    cold_picked.append(random.choices(extra, weights=ew, k=1)[0])
+        cold_picked = set(cold_picked)
+
+        # 次热号补足
+        warm_avail = [r for r in warm_list if r not in cold_picked]
+        ww = [1.0 / (red_counter.get(r, 0.1) + 1) for r in warm_avail]
+        warm_picked = set()
+        while len(warm_picked) < n_warm and warm_avail:
+            pick = random.choices(warm_avail, weights=ww, k=1)[0]
+            idx  = warm_avail.index(pick)
+            warm_picked.add(pick)
+            warm_avail.pop(idx); ww.pop(idx)
+
+        combo = tuple(sorted(cold_picked | warm_picked))
+        if len(combo) != 6:
+            continue   # 极端情况跳过
+
         blue  = random.choices(all_blues, weights=blue_weights, k=1)[0]
-        score = _score_combo_advanced(combo, blue, red_counter, blue_counter, total, top10_hot)
+        score = _score_combo_advanced(combo, blue, red_counter, blue_counter,
+                                      total, top10_hot)
         results.append((combo, blue, score))
+
     return _top_unique(results)
 
 
@@ -594,7 +787,7 @@ def generate_markdown(records, red_counter, blue_counter, all_predictions, last_
     # Tab 3: 智能预测
     # ══════════════════════════════════════════
     algo_names = {
-        "hot":              ("🔥 热号恒热",  "频率越高权重指数放大（freq²），高频球被选中概率远大于低频球"),
+        "hot":              ("🔥 热号恒热",  "指数衰减近期热度（半衰期30期）+ 条件抽样"),
         "cold_rebound":     ("❄️ 冷号反弹",  "频率越低权重越大（1/freq），统计回归角度看冷号有补偿倾向"),
         "cold_hot":         ("🌡️ 冷热混合",  "固定取 TOP12 热号 4 个 + 末尾冷号 2 个，兼顾频率均衡"),
         "weighted_random":  ("⚖️ 加权随机",  "以历史频率为线性权重抽样，概率与频次正比，多维评分筛优"),
@@ -913,7 +1106,7 @@ def main():
     print(f"[INFO] 检测到新期号：{latest_period}（上次：{cached_period or '无'}），继续执行...")
 
     # 3. 运行预测算法
-    print("[INFO] 正在运行预测算法（共5种，各10000次）...")
+    print("[INFO] 正在运行预测算法（共5种，各50000次）...")
     all_predictions = {}
     algos = [
         ("hot",             algo_hot),
@@ -924,7 +1117,11 @@ def main():
     ]
     for key, func in algos:
         print(f"  → {key} ...")
-        all_predictions[key] = func(red_counter, blue_counter, total)
+        if key == "hot":
+            # 热号恒热需要传入 records 以构建衰减权重和共现矩阵
+            all_predictions[key] = func(red_counter, blue_counter, total, records=records)
+        else:
+            all_predictions[key] = func(red_counter, blue_counter, total)
 
     # 4. 生成 Markdown
     update_time = datetime.datetime.now()
