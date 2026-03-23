@@ -1045,14 +1045,20 @@ def cleanup_old_md(ssq_dir: str, keep: int = KEEP_MD_COUNT):
 SSQ_DRAW_WEEKDAYS = {1, 3, 6}
 
 
+def _beijing_today() -> datetime.date:
+    """返回北京时间（UTC+8）的今日日期，避免 GitHub Actions UTC 时区干扰"""
+    tz_cst = datetime.timezone(datetime.timedelta(hours=8))
+    return datetime.datetime.now(tz=tz_cst).date()
+
+
 def is_yesterday_draw_day(force: bool = False) -> bool:
     """
-    判断昨天是否为双色球开奖日（周二/四/日）。
+    判断昨天（北京时间）是否为双色球开奖日（周二/四/日）。
     若命令行传入 --force 参数则跳过检查，强制执行。
     """
     if force:
         return True
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    yesterday = _beijing_today() - datetime.timedelta(days=1)
     return yesterday.weekday() in SSQ_DRAW_WEEKDAYS
 
 
@@ -1064,11 +1070,11 @@ def main():
     print("  双色球预测脚本 v1.0")
     print("=" * 50)
 
-    # 0. 开奖日检查（昨天是否为开奖日：周二/四/日）
+    # 0. 开奖日检查（昨天北京时间是否为开奖日：周二/四/日）
     force = "--force" in sys.argv
+    weekday_names = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+    yesterday = _beijing_today() - datetime.timedelta(days=1)
     if not is_yesterday_draw_day(force):
-        yesterday = datetime.date.today() - datetime.timedelta(days=1)
-        weekday_names = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
         print(
             f"[SKIP] 昨天（{yesterday} {weekday_names[yesterday.weekday()]}）不是开奖日，"
             "本次跳过执行。"
@@ -1077,8 +1083,6 @@ def main():
         print("       如需强制运行，请添加 --force 参数。")
         sys.exit(0)
 
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    weekday_names = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     print(f"[INFO] 昨天（{yesterday} {weekday_names[yesterday.weekday()]}）为开奖日，开始执行...")
 
     # 1. 抓取数据
@@ -1124,7 +1128,7 @@ def main():
             all_predictions[key] = func(red_counter, blue_counter, total)
 
     # 4. 生成 Markdown
-    update_time = datetime.datetime.now()
+    update_time = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     date_str    = update_time.strftime("%Y-%m-%d")
     md_content, save_data = generate_markdown(
         records, red_counter, blue_counter, all_predictions, last_pred, update_time
