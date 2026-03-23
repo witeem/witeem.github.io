@@ -324,7 +324,7 @@ def algo_cold_rebound(red_counter, blue_counter, total, n=SIMULATE, records=None
             负偏离越大（出现次数显著低于均值）权重越高。
     Step3 - 动态冷热比例过滤：每注必须包含 2~3 个冷号
            （遗漏 > 阈值）+ 3~4 个次热号，避免全冷组合
-            导致评分过低无法入选。
+            导致评分过低无法入选。次热号池排除频次最高的前 8 个号。
     Step4 - 关联性修正：若同一注中两个冷号曾在历史上
             同期出现过，视为"关联热"，适当降低其冷号权重
             以增加组合多样性。
@@ -362,15 +362,27 @@ def algo_cold_rebound(red_counter, blue_counter, total, n=SIMULATE, records=None
     # ── Step 3: 冷热分区 ──
     # 冷号：遗漏超过平均间隔 1.5 倍
     cold_threshold = (total_draws / max(avg_freq, 1)) * 1.5
-    cold_set  = {r for r in all_reds if absence[r] >= cold_threshold}
-    warm_set  = {r for r in all_reds if r not in cold_set}   # 次热号池
+    cold_set = {r for r in all_reds if absence[r] >= cold_threshold}
 
-    # 至少要有 2 个冷号和 3 个次热号可供抽取，否则降低阈值
+    # 热号（频次最高的 8 个）：明确排除，不进入次热池
+    top_hot_count = 8          # 排除前 8 个高频号
+    top_hot_set   = set(sorted(all_reds,
+                               key=lambda x: -red_counter.get(x, 0))[:top_hot_count])
+
+    # 次热号池 = 非冷号 且 非顶端热号（频次居中的号码）
+    warm_set = {r for r in all_reds if r not in cold_set and r not in top_hot_set}
+
+    # 保底：至少 2 个冷号 和 3 个次热号
     if len(cold_set) < 2:
         cold_set = set(sorted(all_reds, key=lambda x: -absence[x])[:6])
-        warm_set = set(all_reds) - cold_set
+        top_hot_set = set(sorted(all_reds,
+                                 key=lambda x: -red_counter.get(x, 0))[:top_hot_count])
+        warm_set = {r for r in all_reds if r not in cold_set and r not in top_hot_set}
     if len(warm_set) < 3:
-        warm_set = set(all_reds) - cold_set
+        # 实在不够时允许少量次热号从非冷号里补充（但仍排除最高频的前5个）
+        absolute_top = set(sorted(all_reds,
+                                  key=lambda x: -red_counter.get(x, 0))[:5])
+        warm_set = {r for r in all_reds if r not in cold_set and r not in absolute_top}
 
     # ── Step 4: 关联性修正（冷号对共现惩罚）──
     # 预计算冷号两两共现次数（从 red_counter 无法直接得到，
